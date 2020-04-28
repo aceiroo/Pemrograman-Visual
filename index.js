@@ -55,8 +55,8 @@ const createWindowCreator = () => {
         webPreferences: {
             nodeIntegration: true
         },
-        width: 600,
-        height: 400,
+        width: 800,
+        height: 600,
         title: "Create Appointments" 
     });
 
@@ -84,7 +84,7 @@ ipcMain.on("appointment:create", (event, appointment) => {
     appointment["id"] = uuid();
     appointment["done"] = 0;
     allAppointment.push(appointment);
-
+    sendTodayAppointments();
     createWindow.close();
 
     console.log(allAppointment);
@@ -95,12 +95,22 @@ ipcMain.on("appointment:request:list", event => {
 });
 
 ipcMain.on("appointment:request:today", event => {
+    sendTodayAppointments();
     console.log("here2");
 });
 
 ipcMain.on("appointment:done", (event, id) => {
     console.log("here3");
 });
+
+const sendTodayAppointments = () => {
+    const today = new Date().toISOString().slice(1,10)
+    const filtered = allAppointment.filter(
+        appointment => appointment.date === today
+    );
+    todayWindow.webContents.send("appointment:response:today", filtered);
+}
+
 
 const menuTemplate = [{
         label: "File",
