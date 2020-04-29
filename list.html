@@ -53,6 +53,9 @@
             });
         });
 
+        const done = id => {
+                ipcRenderer.send("appointment:done", id);
+            };
     </script>
 </body>
 </html>

@@ -1,5 +1,6 @@
 const electron = require("electron");
 const uuid = require('uuid').v4;
+const fs = require('fs');
 uuid();
 
 const {
@@ -15,6 +16,13 @@ let listWindow;
 
 let allAppointment = []
 
+fs.readFile("db.json", (err, jsonappointments) => {
+    if(!err){
+        const oldAppointment = JSON.parse(jsonappointments)
+        allAppointment = oldAppointment;
+    }
+});
+
 app.on("ready", () => {
     todayWindow = new BrowserWindow({
         webPreferences: {
@@ -25,6 +33,9 @@ app.on("ready", () => {
 
     todayWindow.loadURL(`file://${__dirname}/today.html`);
     todayWindow.on("closed", () => {
+
+        const jsonAppointment = JSON.stringify(allAppointment);
+        fs.writeFileSync("db.json", jsonAppointment);
 
         app.quit();
         todayWindow = null;
@@ -100,14 +111,19 @@ ipcMain.on("appointment:request:today", event => {
 });
 
 ipcMain.on("appointment:done", (event, id) => {
-    console.log("here3");
+    allAppointment.forEach((appointment) => {
+        appointment.done = 1
+    })
+
+    sendTodayAppointments()
 });
 
 const sendTodayAppointments = () => {
-    const today = new Date().toISOString().slice(1,10)
+    const today = new Date().toISOString().slice(0, 10);
     const filtered = allAppointment.filter(
-        appointment => appointment.date === today
+        (appointment) => appointment.date === today
     );
+
     todayWindow.webContents.send("appointment:response:today", filtered);
 }
 
