@@ -106,7 +106,8 @@ ipcMain.on("appointment:request:list", event => {
 });
 
 ipcMain.on("appointment:request:today", event => {
-    sendTodayAppointments();
+    todayWindow.webContents.send("appointment:response:today",allAppointment);
+   // sendTodayAppointments();
     console.log("here2");
 });
 
@@ -123,7 +124,7 @@ const sendTodayAppointments = () => {
     const filtered = allAppointment.filter(
         (appointment) => appointment.date === today
     );
-
+    console.log("here3");
     todayWindow.webContents.send("appointment:response:today", filtered);
 }
 
